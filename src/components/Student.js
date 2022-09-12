@@ -40,7 +40,9 @@ export default function Student() {
       <Container>
         <Card>
           <Form onSubmit={saveStudent}>
-            <Card.Header>Add Student Information</Card.Header>
+            <Card.Header>
+              <strong>Add Student Information</strong>
+            </Card.Header>
             <Card.Body>
               <Form.Group className="mb-3">
                 <Form.Label>Id</Form.Label>
