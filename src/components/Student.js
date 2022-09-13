@@ -1,11 +1,31 @@
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Container, Form, Card, Button } from "react-bootstrap";
+import { Navigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-export default function Student() {
-  const [id, setId] = useState();
-  const [name, setName] = useState();
-  const [address, setAddress] = useState();
+export default function Student(props) {
+  const [id, setId] = useState(null);
+  const [name, setName] = useState(null);
+  const [address, setAddress] = useState(null);
+
+  const { studentId } = useParams(); // Get the Path Parameter from the URL
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (studentId) {
+      axios
+        .get("http://localhost:8080/student/" + studentId)
+        .then((response) => {
+          if (response.data != null) {
+            setId(response.data.id);
+            setName(response.data.name);
+            setAddress(response.data.address);
+          }
+        })
+        .catch((error) => props.showAlert("danger", "Error"));
+    }
+  }, []);
 
   let student = {
     id: id,
@@ -25,23 +45,40 @@ export default function Student() {
 
   let saveStudent = (event) => {
     event.preventDefault();
+
     axios
       .post("http://localhost:8080/student", student)
       .then((response) => {
         if (response.data != null) {
-          alert("Record added successfully");
+          props.showAlert("success", "Record added successfully");
         }
       })
-      .catch((error) => alert(error));
+      .catch((error) => props.showAlert("danger", "Error"));
+  };
+
+  let updateStudent = (event) => {
+    event.preventDefault();
+    axios
+      .put("http://localhost:8080/student/" + studentId, student)
+      .then((response) => {
+        if (response.data != null) {
+          props.showAlert("success", "Record updated successfully");
+          navigate("/listStudents"); // Navigate to Students List Components
+        }
+      });
   };
 
   return (
     <div className="my-3">
       <Container>
         <Card>
-          <Form onSubmit={saveStudent}>
+          <Form onSubmit={studentId != null ? updateStudent : saveStudent}>
             <Card.Header>
-              <strong>Add Student Information</strong>
+              <strong>
+                {studentId != null
+                  ? "Update Student Information"
+                  : "Add Student Information"}
+              </strong>
             </Card.Header>
             <Card.Body>
               <Form.Group className="mb-3">
@@ -77,7 +114,7 @@ export default function Student() {
             </Card.Body>
             <Card.Footer>
               <Button variant="primary" type="submit">
-                Submit
+                {studentId != null ? "Update" : "Submit"}
               </Button>
             </Card.Footer>
           </Form>
