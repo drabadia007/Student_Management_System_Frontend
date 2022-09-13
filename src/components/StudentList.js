@@ -24,6 +24,7 @@ export default function StudentList() {
       .then((response) => {
         if (response.data !== null) {
           alert("Record Deleted Successfully");
+          setStudents(students.filter((student) => student.id !== studentId));
         }
       });
   };
